@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Compare stocks</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --color-scheme: light;
+            --theme-background: #ffffff;
+            --theme-panel: rgba(255, 255, 255, 0.68);
+            --theme-panel-strong: rgba(255, 255, 255, 0.82);
+            --theme-text: #0b0c0c;
+            --theme-muted: #505a5f;
+            --theme-accent-primary: #0055cc;
+            --theme-accent-secondary: #ff2f92;
+            --theme-accent-positive: #2fff9c;
+            --theme-shadow: 0 24px 80px rgba(17, 24, 39, 0.10);
+            --theme-glass-highlight: rgba(255, 255, 255, 0.55);
+            --theme-radius-shell: 10px;
+            --theme-radius-panel: 10px;
+            --theme-radius-control: 10px;
+            --logo-search-size: 18px;
+            --logo-card-size: 20px;
+            --logo-tooltip-size: 16px;
+        }
+    </style>
+    <link rel="stylesheet" href="/static/assets/css/app.css?v=v2.10.1">
+</head>
+<body>
+<main class="page">
+    <div class="app-shell is-sidebar-open">
+        <button type="button" class="sidebar-toggle" id="sidebar_toggle" aria-label="Toggle sidebar" aria-expanded="true">
+            <span class="icon icon-sidebar-left" aria-hidden="true"></span>
+        </button>
+        <aside class="panel sidebar" id="app_sidebar">
+            <section class="hero">
+                <h1>Compute your portfolio</h1>
+            </section>
+            
+
+<form class="controls" method="get" action="/portfolio">
+    <div id="ticker_fields">
+        
+        <div class="field ticker-field" data-index="1">
+            <div class="ticker-input-row">
+                <div class="ticker-input-main">
+                    <label for="ticker_1">Ticker 1</label>
+                    <div class="ticker-input-control">
+                        <span class="ticker-leading-slot" aria-hidden="true">
+                            <span class="ticker-logo-placeholder"></span>
+                            <img class="ticker-input-logo" alt="">
+                        </span>
+                        <input id="ticker_1" name="ticker" data-ticker-input value="MSFT" placeholder="" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="latin" title="Use a valid ticker such as MSFT, GOOGL, NVDA, AMZN, MU, AMD, or META." required>
+                        <button type="button" class="ticker-clear" aria-label="Clear ticker"><span class="icon icon-remove-muted" aria-hidden="true"></span></button>
+                    </div>
+                    <div class="field-tooltip field-tooltip-duplicate" hidden>This ticker is already used. Choose a different one.</div>
+                    <div class="field-tooltip field-tooltip-invalid" hidden>Unknown or unsupported ticker.</div>
+                    <div class="suggestions" id="ticker_1_suggestions"></div>
+                </div>
+                
+                <div class="portfolio-weight-field">
+                    <div class="portfolio-weight-row">
+                        <input id="weight_1" name="weight" class="portfolio-weight-input" type="number" min="0" max="100" step="1" value="50" placeholder="Weight" aria-label="Weight">
+                        <span class="portfolio-weight-unit">%</span>
+                    </div>
+                    <div class="portfolio-weight-slider-shell" aria-hidden="true">
+                        <input class="portfolio-weight-slider" type="range" min="0" max="100" step="1" value="50" aria-label="Weight">
+                    </div>
+                    <div class="portfolio-weight-tooltip field-tooltip" hidden></div>
+                </div>
+                
+                <button type="button" class="ticker-remove is-placeholder" aria-label="Remove ticker" tabindex="-1" aria-hidden="true"><span class="icon icon-remove-muted" aria-hidden="true"></span></button>
+            </div>
+        </div>
+        
+        <div class="field ticker-field" data-index="2">
+            <div class="ticker-input-row">
+                <div class="ticker-input-main">
+                    <label for="ticker_2">Ticker 2</label>
+                    <div class="ticker-input-control">
+                        <span class="ticker-leading-slot" aria-hidden="true">
+                            <span class="ticker-logo-placeholder"></span>
+                            <img class="ticker-input-logo" alt="">
+                        </span>
+                        <input id="ticker_2" name="ticker" data-ticker-input value="AAPL" placeholder="" autocomplete="off" autocapitalize="characters" spellcheck="false" inputmode="latin" title="Use a valid ticker such as MSFT, GOOGL, NVDA, AMZN, MU, AMD, or META." required>
+                        <button type="button" class="ticker-clear" aria-label="Clear ticker"><span class="icon icon-remove-muted" aria-hidden="true"></span></button>
+                    </div>
+                    <div class="field-tooltip field-tooltip-duplicate" hidden>This ticker is already used. Choose a different one.</div>
+                    <div class="field-tooltip field-tooltip-invalid" hidden>Unknown or unsupported ticker.</div>
+                    <div class="suggestions" id="ticker_2_suggestions"></div>
+                </div>
+                
+                <div class="portfolio-weight-field">
+                    <div class="portfolio-weight-row">
+                        <input id="weight_2" name="weight" class="portfolio-weight-input" type="number" min="0" max="100" step="1" value="50" placeholder="Weight" aria-label="Weight">
+                        <span class="portfolio-weight-unit">%</span>
+                    </div>
+                    <div class="portfolio-weight-slider-shell" aria-hidden="true">
+                        <input class="portfolio-weight-slider" type="range" min="0" max="100" step="1" value="50" aria-label="Weight">
+                    </div>
+                    <div class="portfolio-weight-tooltip field-tooltip" hidden></div>
+                </div>
+                
+                <button type="button" class="ticker-remove is-placeholder" aria-label="Remove ticker" tabindex="-1" aria-hidden="true"><span class="icon icon-remove-muted" aria-hidden="true"></span></button>
+            </div>
+        </div>
+        
+    </div>
+    <div class="field" id="ticker_add_wrapper" >
+        <button type="button" id="add_ticker" class="flat-link-button"><span class="icon icon-plus" aria-hidden="true"></span> Add a ticker</button>
+    </div>
+    <div class="field">
+    <div class="range-mode-shell" data-active="period">
+        <label class="range-mode-option" for="range_period">
+            <input id="range_period" name="range" type="radio" value="period" checked>
+            <span>Relative</span>
+        </label>
+        <label class="range-mode-option" for="range_exact">
+            <input id="range_exact" name="range" type="radio" value="exact" >
+            <span>Exact</span>
+        </label>
+    </div>
+</div>
+<div class="field range-panel" id="period_panel">
+    <label for="period">Period</label>
+    <select id="period" name="period">
+        
+        <option value="1mo" >1 month</option>
+        
+        <option value="3mo" >3 months</option>
+        
+        <option value="6mo" >6 months</option>
+        
+        <option value="1y" selected>1 year</option>
+        
+        <option value="2y" >2 years</option>
+        
+        <option value="5y" >5 years</option>
+        
+        <option value="10y" >10 years</option>
+        
+        <option value="max" >Max</option>
+        
+    </select>
+</div>
+<div class="field range-panel" id="exact_panel" hidden>
+    <div class="date-picker-grid">
+        <div class="date-picker-field" data-date-picker>
+            <label for="exact_start">Start from</label>
+            <input id="exact_start" name="from" type="hidden" value="2025-03-17">
+            <button type="button" class="date-picker-trigger" data-date-trigger aria-haspopup="dialog" aria-expanded="false">
+                <span class="date-picker-trigger-value" data-date-trigger-value></span>
+            </button>
+            <div class="date-picker-popover" data-date-popover hidden>
+                <div class="date-picker-toolbar">
+                    <button type="button" class="date-picker-nav" data-date-nav="-1" aria-label="Previous month">
+                        <span class="icon icon-page-prev" aria-hidden="true"></span>
+                    </button>
+                    <p class="date-picker-month" data-date-month></p>
+                    <button type="button" class="date-picker-nav" data-date-nav="1" aria-label="Next month">
+                        <span class="icon icon-page-next" aria-hidden="true"></span>
+                    </button>
+                </div>
+                <div class="date-picker-weekdays" aria-hidden="true">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+                <div class="date-picker-days" data-date-grid></div>
+            </div>
+        </div>
+        <div class="date-picker-field" data-date-picker>
+            <label for="exact_end" class="date-end-label">to</label>
+            <input id="exact_end" name="to" type="hidden" value="2026-03-16">
+            <button type="button" class="date-picker-trigger" data-date-trigger aria-haspopup="dialog" aria-expanded="false">
+                <span class="date-picker-trigger-value" data-date-trigger-value></span>
+            </button>
+            <div class="date-picker-popover" data-date-popover hidden>
+                <div class="date-picker-toolbar">
+                    <button type="button" class="date-picker-nav" data-date-nav="-1" aria-label="Previous month">
+                        <span class="icon icon-page-prev" aria-hidden="true"></span>
+                    </button>
+                    <p class="date-picker-month" data-date-month></p>
+                    <button type="button" class="date-picker-nav" data-date-nav="1" aria-label="Next month">
+                        <span class="icon icon-page-next" aria-hidden="true"></span>
+                    </button>
+                </div>
+                <div class="date-picker-weekdays" aria-hidden="true">
+                    <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                </div>
+                <div class="date-picker-days" data-date-grid></div>
+            </div>
+        </div>
+    </div>
+</div>
+    <div class="field-checkbox field-switch">
+        <label class="switch-row" for="include_dividends">
+            <span class="switch-label">Include cash dividends</span>
+            <span class="ios-switch-shell">
+                <input id="include_dividends" name="dividends" type="checkbox" value="1" >
+                <span class="ios-switch-slider" aria-hidden="true"></span>
+            </span>
+        </label>
+    </div>
+    <div class="field">
+        <button id="submit" type="submit">Compute</button>
+    </div>
+</form>
+
+        </aside>
+        <section class="panel chart-panel workspace" id="workspace_panel">
+            
+            
+            
+<div class="workspace-header">
+    <article class="report-card">
+        <div class="report-heading-row">
+            <p class="report-heading">Portfolio summary</p>
+            <div class="report-info">
+    <button type="button" class="report-info-button" aria-label="Show portfolio details">i</button>
+    <div class="report-info-tooltip chart-tooltip" role="tooltip">
+        <dl class="report-info-meta">
+            <div class="report-info-row">
+                <dt>Period</dt>
+                <dd>1 year</dd>
+            </div>
+            <div class="report-info-row">
+                <dt>Range</dt>
+                <dd>17 Mar 2025 - 16 Mar 2026</dd>
+            </div>
+            <div class="report-info-row">
+                <dt>Return mode</dt>
+                <dd>Price return only</dd>
+            </div>
+        </dl>
+    </div>
+</div>
+        </div>
+        <div id="portfolio_summary_region" class="portfolio-summary">
+            <div class="portfolio-donut-block">
+                <div id="portfolio_donut_start_orbit" class="portfolio-donut-orbit" data-workspace-mask="portfolio-donut-start">
+                    <div id="portfolio_donut_start_logo_layer" class="portfolio-donut-logo-layer" aria-hidden="true"></div>
+                    <div id="portfolio_donut_start" class="portfolio-donut" aria-label="Allocation"></div>
+                </div>
+                <span class="portfolio-donut-arrow icon icon-portfolio-donut-flow" aria-hidden="true"></span>
+                <div id="portfolio_donut_end_orbit" class="portfolio-donut-orbit" data-workspace-mask="portfolio-donut-end">
+                    <div id="portfolio_donut_end_logo_layer" class="portfolio-donut-logo-layer" aria-hidden="true"></div>
+                    <div id="portfolio_donut_end" class="portfolio-donut" aria-label="Portfolio ending return"></div>
+                </div>
+            </div>
+            <div class="portfolio-summary-main">
+                <p class="portfolio-total-label">Portfolio ending return</p>
+                <p id="portfolio_total_return" class="portfolio-total-value" data-workspace-mask="portfolio-total-return">10.52%</p>
+            </div>
+        </div>
+    </article>
+</div>
+<div class="chart-surface">
+    <div class="chart-heading-row">
+        <p class="chart-heading">Portfolio return chart</p>
+    </div>
+    <div id="portfolio_chart_region">
+    
+    <div class="chart-wrap" data-workspace-mask="chart-area">
+        <canvas id="returnsChart"></canvas>
+    </div>
+    
+    </div>
+</div>
+
+        </section>
+    </div>
+    <nav class="sidebar-dock" aria-label="Workspace modes">
+        <a href="/compare" class="sidebar-dock-item" aria-current="" aria-label="Compare stocks" data-tooltip="Compare stocks">
+            <span class="icon icon-dock-compare" aria-hidden="true"></span>
+            <span class="sr-only">Compare stocks</span>
+        </a>
+        <a href="/portfolio" class="sidebar-dock-item is-active" aria-current="page" aria-label="Compute your portfolio" data-tooltip="Compute your portfolio">
+            <span class="icon icon-dock-portfolio" aria-hidden="true"></span>
+            <span class="sr-only">Compute your portfolio</span>
+        </a>
+        <a href="/trade-messages" class="sidebar-dock-item" aria-current="" aria-label="Trade messages" data-tooltip="Trade messages">
+            <span class="icon icon-dock-trade-messages" aria-hidden="true"></span>
+            <span class="sr-only">Trade messages</span>
+        </a>
+        <a href="/settings/about" class="sidebar-dock-item sidebar-dock-item-settings" aria-current="" aria-label="Settings" data-tooltip="Settings">
+            <span class="icon icon-dock-settings" aria-hidden="true"></span>
+            <span class="sr-only">Settings</span>
+        </a>
+    </nav>
+</main>
+<div id="settings_action_overlay" class="settings-action-overlay" hidden>
+    <div class="settings-action-dialog chart-tooltip">
+        <button type="button" id="settings_action_overlay_close" class="dismiss-button settings-action-close" aria-label="Close">
+            <span class="icon icon-dismiss-control" aria-hidden="true"></span>
+        </button>
+        <span id="settings_action_overlay_icon" class="icon icon-overlay-refresh settings-action-icon" aria-hidden="true"></span>
+        <p class="settings-action-title">Updating local market data</p>
+        <p class="settings-action-copy">This may take a moment while the app checks remote data and refreshes the local store.</p>
+    </div>
+</div>
+<script id="antigravity_state" type="application/json">{"chart": {"profiles": [{"company_name": "Microsoft Corporation", "logo_url": "/market-store/logos/MSFT.png", "ticker": "MSFT", "website": "https://www.microsoft.com"}, {"company_name": "Apple Inc.", "logo_url": "/market-store/logos/AAPL.png", "ticker": "AAPL", "website": "https://www.apple.com"}, {"company_name": "Invesco QQQ Trust", "logo_url": "/market-store/logos/QQQ.png", "ticker": "QQQ", "website": "https://www.invesco.com"}], "series": [{"color": "#0055cc", "dates": ["17 Mar 2025", "18 Mar 2025", "19 Mar 2025", "20 Mar 2025", "21 Mar 2025", "24 Mar 2025", "25 Mar 2025", "26 Mar 2025", "27 Mar 2025", "28 Mar 2025", "31 Mar 2025", "1 Apr 2025", "2 Apr 2025", "3 Apr 2025", "4 Apr 2025", "7 Apr 2025", "8 Apr 2025", "9 Apr 2025", "10 Apr 2025", "11 Apr 2025", "14 Apr 2025", "15 Apr 2025", "16 Apr 2025", "17 Apr 2025", "21 Apr 2025", "22 Apr 2025", "23 Apr 2025", "24 Apr 2025", "25 Apr 2025", "28 Apr 2025", "29 Apr 2025", "30 Apr 2025", "1 May 2025", "2 May 2025", "5 May 2025", "6 May 2025", "7 May 2025", "8 May 2025", "9 May 2025", "12 May 2025", "13 May 2025", "14 May 2025", "15 May 2025", "16 May 2025", "19 May 2025", "20 May 2025", "21 May 2025", "22 May 2025", "23 May 2025", "27 May 2025", "28 May 2025", "29 May 2025", "30 May 2025", "2 Jun 2025", "3 Jun 2025", "4 Jun 2025", "5 Jun 2025", "6 Jun 2025", "9 Jun 2025", "10 Jun 2025", "11 Jun 2025", "12 Jun 2025", "13 Jun 2025", "16 Jun 2025", "17 Jun 2025", "18 Jun 2025", "20 Jun 2025", "23 Jun 2025", "24 Jun 2025", "25 Jun 2025", "26 Jun 2025", "27 Jun 2025", "30 Jun 2025", "1 Jul 2025", "2 Jul 2025", "3 Jul 2025", "7 Jul 2025", "8 Jul 2025", "9 Jul 2025", "10 Jul 2025", "11 Jul 2025", "14 Jul 2025", "15 Jul 2025", "16 Jul 2025", "17 Jul 2025", "18 Jul 2025", "21 Jul 2025", "22 Jul 2025", "23 Jul 2025", "24 Jul 2025", "25 Jul 2025", "28 Jul 2025", "29 Jul 2025", "30 Jul 2025", "31 Jul 2025", "1 Aug 2025", "4 Aug 2025", "5 Aug 2025", "6 Aug 2025", "7 Aug 2025", "8 Aug 2025", "11 Aug 2025", "12 Aug 2025", "13 Aug 2025", "14 Aug 2025", "15 Aug 2025", "18 Aug 2025", "19 Aug 2025", "20 Aug 2025", "21 Aug 2025", "22 Aug 2025", "25 Aug 2025", "26 Aug 2025", "27 Aug 2025", "28 Aug 2025", "29 Aug 2025", "2 Sep 2025", "3 Sep 2025", "4 Sep 2025", "5 Sep 2025", "8 Sep 2025", "9 Sep 2025", "10 Sep 2025", "11 Sep 2025", "12 Sep 2025", "15 Sep 2025", "16 Sep 2025", "17 Sep 2025", "18 Sep 2025", "19 Sep 2025", "22 Sep 2025", "23 Sep 2025", "24 Sep 2025", "25 Sep 2025", "26 Sep 2025", "29 Sep 2025", "30 Sep 2025", "1 Oct 2025", "2 Oct 2025", "3 Oct 2025", "6 Oct 2025", "7 Oct 2025", "8 Oct 2025", "9 Oct 2025", "10 Oct 2025", "13 Oct 2025", "14 Oct 2025", "15 Oct 2025", "16 Oct 2025", "17 Oct 2025", "20 Oct 2025", "21 Oct 2025", "22 Oct 2025", "23 Oct 2025", "24 Oct 2025", "27 Oct 2025", "28 Oct 2025", "29 Oct 2025", "30 Oct 2025", "31 Oct 2025", "3 Nov 2025", "4 Nov 2025", "5 Nov 2025", "6 Nov 2025", "7 Nov 2025", "10 Nov 2025", "11 Nov 2025", "12 Nov 2025", "13 Nov 2025", "14 Nov 2025", "17 Nov 2025", "18 Nov 2025", "19 Nov 2025", "20 Nov 2025", "21 Nov 2025", "24 Nov 2025", "25 Nov 2025", "26 Nov 2025", "28 Nov 2025", "1 Dec 2025", "2 Dec 2025", "3 Dec 2025", "4 Dec 2025", "5 Dec 2025", "8 Dec 2025", "9 Dec 2025", "10 Dec 2025", "11 Dec 2025", "12 Dec 2025", "15 Dec 2025", "16 Dec 2025", "17 Dec 2025", "18 Dec 2025", "19 Dec 2025", "22 Dec 2025", "23 Dec 2025", "24 Dec 2025", "26 Dec 2025", "29 Dec 2025", "30 Dec 2025", "31 Dec 2025", "2 Jan 2026", "5 Jan 2026", "6 Jan 2026", "7 Jan 2026", "8 Jan 2026", "9 Jan 2026", "12 Jan 2026", "13 Jan 2026", "14 Jan 2026", "15 Jan 2026", "16 Jan 2026", "20 Jan 2026", "21 Jan 2026", "22 Jan 2026", "23 Jan 2026", "26 Jan 2026", "27 Jan 2026", "28 Jan 2026", "29 Jan 2026", "30 Jan 2026", "2 Feb 2026", "3 Feb 2026", "4 Feb 2026", "5 Feb 2026", "6 Feb 2026", "9 Feb 2026", "10 Feb 2026", "11 Feb 2026", "12 Feb 2026", "13 Feb 2026", "17 Feb 2026", "18 Feb 2026", "19 Feb 2026", "20 Feb 2026", "23 Feb 2026", "24 Feb 2026", "25 Feb 2026", "26 Feb 2026", "27 Feb 2026", "2 Mar 2026", "3 Mar 2026", "4 Mar 2026", "5 Mar 2026", "6 Mar 2026", "9 Mar 2026", "10 Mar 2026", "11 Mar 2026", "12 Mar 2026", "13 Mar 2026", "16 Mar 2026"], "glow": true, "normalized_returns": [0.0, -0.9724, 0.1765, -0.2159, 1.327, 2.1358, 3.109, 1.9227, 2.5432, -0.3623, 0.1874, 1.3098, 1.4669, -4.5311, -9.6984, -11.5699, -14.1065, -3.3095, -6.4548, -3.7354, -2.7967, -3.1531, -6.8082, -6.6677, -8.6742, -6.1463, -4.037, -1.4955, -0.6976, -0.5854, 0.035, 0.4934, 4.562, 3.9707, 2.5759, 2.1192, 1.5963, 2.506, 2.8211, 7.0401, 7.5246, 7.8733, 7.6921, 7.7943, 7.8066, 7.268, 5.4331, 5.5571, 3.5322, 6.0384, 5.6591, 5.7191, 6.1455, 6.5512, 7.0466, 7.0573, 7.0357, 8.1517, 7.8794, 7.9291, 7.2389, 8.141, 6.9955, 7.9935, 7.2024, 7.7051, 8.3724, 9.5955, 9.8438, 10.4161, 10.9516, 10.776, 11.9207, 11.8504, 12.8063, 14.0626, 13.0774, 12.9499, 14.1002, 14.1358, 14.0805, 13.4484, 13.9231, 14.1427, 14.8921, 14.9508, 15.2559, 15.0883, 15.1071, 15.6604, 16.0525, 15.9366, 15.296, 14.8635, 17.1239, 14.7034, 16.4131, 15.2978, 17.3498, 18.4066, 20.7385, 20.1968, 21.7347, 21.4806, 21.5965, 21.0213, 20.4629, 19.4429, 17.8588, 17.4091, 18.4619, 17.9397, 18.1565, 19.0367, 19.8934, 19.4158, 18.6485, 20.7224, 21.3655, 19.6761, 19.6649, 18.8671, 17.3529, 18.1922, 20.2797, 21.5965, 21.1223, 21.4446, 20.9834, 23.9832, 26.0075, 24.9505, 24.5735, 25.2376, 25.478, 25.6413, 26.1189, 26.5369, 26.4188, 26.8338, 27.9663, 27.3268, 27.8079, 26.5535, 23.0329, 23.9887, 23.9527, 24.3015, 23.6258, 25.0101, 27.7477, 27.9835, 27.3446, 27.6112, 28.7605, 31.1776, 32.579, 32.6757, 31.0418, 29.7785, 29.3697, 29.2537, 28.3548, 26.9743, 26.6345, 28.0397, 29.7442, 29.6448, 28.5135, 29.2736, 27.7711, 26.0041, 25.4078, 23.7503, 24.1629, 25.4398, 26.0697, 27.2999, 28.441, 28.7561, 29.8974, 27.8425, 27.4364, 27.2863, 28.0894, 28.0521, 26.6946, 27.1509, 26.5739, 25.1223, 25.4411, 24.7592, 25.852, 26.4474, 25.6879, 26.2609, 26.7502, 26.6145, 26.6202, 26.5102, 25.7286, 24.1562, 23.2685, 22.8517, 23.0154, 22.0245, 22.2521, 22.1876, 21.5371, 19.8302, 19.0714, 18.8569, 16.1069, 14.9897, 16.0576, 17.8902, 20.1692, 22.1623, 21.8698, 16.1086, 15.9761, 17.5462, 15.8582, 17.8793, 15.1043, 16.5815, 17.3665, 17.1045, 16.3848, 12.8421, 11.385, 12.7039, 13.1661, 12.1386, 12.915, 11.6475, 13.6227, 15.6032, 15.4482, 12.244, 13.1175, 13.5829, 13.4589, 13.6428, 12.7603, 13.3836, 13.1361, 13.0182, 11.4498, 9.3204, 10.5172], "ticker": "PORTFOLIO"}, {"color": "#c7c7cc", "dates": ["17 Mar 2025", "18 Mar 2025", "19 Mar 2025", "20 Mar 2025", "21 Mar 2025", "24 Mar 2025", "25 Mar 2025", "26 Mar 2025", "27 Mar 2025", "28 Mar 2025", "31 Mar 2025", "1 Apr 2025", "2 Apr 2025", "3 Apr 2025", "4 Apr 2025", "7 Apr 2025", "8 Apr 2025", "9 Apr 2025", "10 Apr 2025", "11 Apr 2025", "14 Apr 2025", "15 Apr 2025", "16 Apr 2025", "17 Apr 2025", "21 Apr 2025", "22 Apr 2025", "23 Apr 2025", "24 Apr 2025", "25 Apr 2025", "28 Apr 2025", "29 Apr 2025", "30 Apr 2025", "1 May 2025", "2 May 2025", "5 May 2025", "6 May 2025", "7 May 2025", "8 May 2025", "9 May 2025", "12 May 2025", "13 May 2025", "14 May 2025", "15 May 2025", "16 May 2025", "19 May 2025", "20 May 2025", "21 May 2025", "22 May 2025", "23 May 2025", "27 May 2025", "28 May 2025", "29 May 2025", "30 May 2025", "2 Jun 2025", "3 Jun 2025", "4 Jun 2025", "5 Jun 2025", "6 Jun 2025", "9 Jun 2025", "10 Jun 2025", "11 Jun 2025", "12 Jun 2025", "13 Jun 2025", "16 Jun 2025", "17 Jun 2025", "18 Jun 2025", "20 Jun 2025", "23 Jun 2025", "24 Jun 2025", "25 Jun 2025", "26 Jun 2025", "27 Jun 2025", "30 Jun 2025", "1 Jul 2025", "2 Jul 2025", "3 Jul 2025", "7 Jul 2025", "8 Jul 2025", "9 Jul 2025", "10 Jul 2025", "11 Jul 2025", "14 Jul 2025", "15 Jul 2025", "16 Jul 2025", "17 Jul 2025", "18 Jul 2025", "21 Jul 2025", "22 Jul 2025", "23 Jul 2025", "24 Jul 2025", "25 Jul 2025", "28 Jul 2025", "29 Jul 2025", "30 Jul 2025", "31 Jul 2025", "1 Aug 2025", "4 Aug 2025", "5 Aug 2025", "6 Aug 2025", "7 Aug 2025", "8 Aug 2025", "11 Aug 2025", "12 Aug 2025", "13 Aug 2025", "14 Aug 2025", "15 Aug 2025", "18 Aug 2025", "19 Aug 2025", "20 Aug 2025", "21 Aug 2025", "22 Aug 2025", "25 Aug 2025", "26 Aug 2025", "27 Aug 2025", "28 Aug 2025", "29 Aug 2025", "2 Sep 2025", "3 Sep 2025", "4 Sep 2025", "5 Sep 2025", "8 Sep 2025", "9 Sep 2025", "10 Sep 2025", "11 Sep 2025", "12 Sep 2025", "15 Sep 2025", "16 Sep 2025", "17 Sep 2025", "18 Sep 2025", "19 Sep 2025", "22 Sep 2025", "23 Sep 2025", "24 Sep 2025", "25 Sep 2025", "26 Sep 2025", "29 Sep 2025", "30 Sep 2025", "1 Oct 2025", "2 Oct 2025", "3 Oct 2025", "6 Oct 2025", "7 Oct 2025", "8 Oct 2025", "9 Oct 2025", "10 Oct 2025", "13 Oct 2025", "14 Oct 2025", "15 Oct 2025", "16 Oct 2025", "17 Oct 2025", "20 Oct 2025", "21 Oct 2025", "22 Oct 2025", "23 Oct 2025", "24 Oct 2025", "27 Oct 2025", "28 Oct 2025", "29 Oct 2025", "30 Oct 2025", "31 Oct 2025", "3 Nov 2025", "4 Nov 2025", "5 Nov 2025", "6 Nov 2025", "7 Nov 2025", "10 Nov 2025", "11 Nov 2025", "12 Nov 2025", "13 Nov 2025", "14 Nov 2025", "17 Nov 2025", "18 Nov 2025", "19 Nov 2025", "20 Nov 2025", "21 Nov 2025", "24 Nov 2025", "25 Nov 2025", "26 Nov 2025", "28 Nov 2025", "1 Dec 2025", "2 Dec 2025", "3 Dec 2025", "4 Dec 2025", "5 Dec 2025", "8 Dec 2025", "9 Dec 2025", "10 Dec 2025", "11 Dec 2025", "12 Dec 2025", "15 Dec 2025", "16 Dec 2025", "17 Dec 2025", "18 Dec 2025", "19 Dec 2025", "22 Dec 2025", "23 Dec 2025", "24 Dec 2025", "26 Dec 2025", "29 Dec 2025", "30 Dec 2025", "31 Dec 2025", "2 Jan 2026", "5 Jan 2026", "6 Jan 2026", "7 Jan 2026", "8 Jan 2026", "9 Jan 2026", "12 Jan 2026", "13 Jan 2026", "14 Jan 2026", "15 Jan 2026", "16 Jan 2026", "20 Jan 2026", "21 Jan 2026", "22 Jan 2026", "23 Jan 2026", "26 Jan 2026", "27 Jan 2026", "28 Jan 2026", "29 Jan 2026", "30 Jan 2026", "2 Feb 2026", "3 Feb 2026", "4 Feb 2026", "5 Feb 2026", "6 Feb 2026", "9 Feb 2026", "10 Feb 2026", "11 Feb 2026", "12 Feb 2026", "13 Feb 2026", "17 Feb 2026", "18 Feb 2026", "19 Feb 2026", "20 Feb 2026", "23 Feb 2026", "24 Feb 2026", "25 Feb 2026", "26 Feb 2026", "27 Feb 2026", "2 Mar 2026", "3 Mar 2026", "4 Mar 2026", "5 Mar 2026", "6 Mar 2026", "9 Mar 2026", "10 Mar 2026", "11 Mar 2026", "12 Mar 2026", "13 Mar 2026", "16 Mar 2026"], "glow": false, "normalized_returns": [0.0, -1.7047, -0.3894, -0.7271, -0.3998, 1.6343, 2.2143, 0.3335, -0.2382, -2.8647, -2.8689, -2.0859, -1.3713, -6.6512, -12.449, -12.2377, -13.8182, -3.4737, -7.5792, -5.8765, -5.2385, -5.1329, -7.9935, -8.01, -10.2865, -7.9313, -5.8434, -3.1941, -2.1149, -2.1459, -1.4997, -1.5121, -0.2258, 1.2553, 0.6546, -0.2817, 0.1098, 1.1434, 1.0771, 5.195, 6.7983, 7.4383, 7.5564, 8.0245, 8.1281, 7.7677, 6.2701, 6.4689, 5.4829, 7.9645, 7.486, 7.6972, 7.5274, 8.3767, 9.2239, 9.5284, 8.7039, 9.7666, 9.9281, 10.6552, 10.2823, 10.5412, 9.1534, 10.6717, 9.5926, 9.5739, 9.1265, 10.1249, 11.8089, 12.0948, 13.1429, 13.5303, 14.2656, 13.3024, 14.0916, 15.2143, 14.3464, 14.4106, 15.2205, 15.0548, 14.7959, 15.2122, 15.3178, 15.4359, 16.3701, 16.2583, 16.861, 16.2562, 16.7865, 17.035, 17.3167, 17.6834, 17.5011, 17.6585, 17.035, 14.7296, 16.8465, 16.0532, 17.5135, 17.9112, 19.0111, 18.659, 20.1504, 20.2105, 20.1172, 19.589, 19.5414, 17.9195, 17.2194, 16.6767, 18.4767, 18.1349, 18.6093, 18.7916, 19.5352, 18.1515, 17.1614, 18.0831, 19.152, 19.3239, 19.906, 20.2457, 20.285, 20.9852, 21.5196, 22.5594, 22.4558, 22.2114, 23.3134, 24.1481, 24.7385, 23.9099, 23.4749, 22.9426, 23.448, 24.0197, 24.3594, 24.956, 25.4697, 24.9415, 25.8798, 25.217, 26.6524, 26.4992, 22.1078, 24.6991, 23.8685, 24.7426, 24.2807, 25.0968, 26.6732, 26.64, 25.42, 26.4743, 27.8248, 30.1013, 31.1018, 31.6921, 29.6787, 30.3043, 30.9278, 28.2702, 29.105, 26.7001, 26.3003, 29.0946, 28.7508, 28.6493, 26.0228, 26.118, 25.0409, 23.5184, 24.2559, 21.3145, 22.2259, 25.3516, 26.1242, 27.2387, 28.2702, 27.8393, 28.8398, 29.1547, 29.0345, 29.5607, 29.3121, 29.4716, 30.0019, 29.5814, 27.104, 26.466, 26.7167, 24.3677, 26.1698, 27.8145, 28.2619, 28.8626, 29.2396, 29.2313, 28.6058, 28.3075, 27.2469, 27.0004, 28.0092, 29.134, 29.2582, 28.5229, 29.803, 29.9107, 29.7181, 28.3323, 28.7943, 28.6865, 25.9523, 27.655, 28.583, 28.989, 29.5565, 30.731, 31.1639, 30.3789, 28.8129, 29.6974, 27.7047, 25.4738, 23.6676, 26.2817, 27.249, 26.6587, 26.9984, 24.4154, 24.6805, 24.5521, 25.4821, 25.0016, 26.1077, 24.5748, 25.913, 27.7378, 26.1967, 25.7928, 25.9585, 24.6101, 26.5095, 26.1284, 24.231, 25.8902, 25.8923, 25.8757, 23.7152, 22.982, 24.3615], "ticker": "QQQ"}]}, "chartConfig": {"line_width": 2.5, "line_width_active": 3.2, "line_width_inactive": 1.8, "point_hit_radius": 18, "point_hover_radius": 4, "shadow_blur": 16, "shadow_blur_active": 22, "shadow_blur_inactive": 8, "zero_line_color": "rgba(160, 167, 178, 0.85)", "zero_line_width": 1}, "constraints": {"maxTickers": 5, "minTickers": 2}, "currentView": "portfolio", "defaults": {"include_dividends": false, "period": "1y", "portfolio_tickers": ["NVDA", "AAPL", "QQQ"], "portfolio_weights": [25, 25, 50], "range_mode": "period", "ticker_a": "QQQ", "ticker_b": "JEPQ"}, "endpoints": {"dateConstraints": "/api/date-constraints", "localStorePageData": "/api/settings/local-market-store/page-data", "settingsNetworkStatus": "/api/settings/network-status", "symbolSearch": "/api/symbol-search"}, "labels": {"about": "About", "chart_summary": "Stock return comparison", "code_version": "Code version:", "compute": "Compute", "dock_portfolio": "Compute your portfolio", "dock_settings": "Settings", "dock_tickers": "Compare stocks", "dock_trade_messages": "Trade messages", "email_smtp": "Email (SMTP)", "email_smtp_from": "Outlook email", "email_smtp_host": "SMTP host", "email_smtp_password": "Password", "email_smtp_password_saved": "A password is already stored locally. Leave this field empty to keep it unchanged.", "email_smtp_port": "Port", "email_smtp_save": "Save SMTP config", "email_smtp_starttls": "Use STARTTLS", "email_smtp_summary": "Configure the Outlook SMTP relay used for strategy-trade notifications. Enter your Outlook email and password, and the app will use that same address for SMTP login.", "email_smtp_test": "Test SMTP login", "email_smtp_test_failure": "SMTP connection test failed.", "email_smtp_test_success": "SMTP connection test succeeded.", "ending_return": "ending return", "exact_range": "Exact range", "hero_subtitle": "Compare up to five tickers across the same daily window with local caching and optional cash dividend inclusion.", "hero_title": "Compare stocks", "include_dividends": "Include cash dividends", "local_market_store": "Local market store", "local_store_delete": "Delete", "local_store_empty": "No local market data is available yet.", "local_store_logo": "Logo", "local_store_name": "Full name", "local_store_range": "Available range", "local_store_summary": "Bundled local market data available in this workspace.", "local_store_symbol": "Symbol", "local_store_ticker": "Ticker", "local_store_update": "Update", "logo_network": "Logo retrieval", "logo_reachable": "Logo services reachable", "logo_unreachable": "Logo services unavailable", "network_self_check": "Network self-check", "page_title": "Compare stocks", "performance_summary": "Performance summary", "period": "Period", "portfolio_allocation": "Allocation", "portfolio_chart": "Portfolio return chart", "portfolio_placeholder": "Add ticker weights to compute the portfolio return.", "portfolio_summary": "Portfolio summary", "portfolio_title": "Compute your portfolio", "portfolio_total_return": "Portfolio ending return", "portfolio_weight": "Weight", "range": "Range", "range_mode_exact": "Exact", "range_mode_period": "Relative", "range_selection": "Comparison window", "return_mode": "Return mode", "return_mode_price": "Price return only", "return_mode_total": "Cash dividends included", "service_down": "Unavailable", "service_name": "Service", "service_note": "Note", "service_note_down": "Blocked or unavailable in the current environment.", "service_note_ok": "Reachable in the current environment.", "service_ok": "Available", "service_state": "Status", "service_status": "Service status", "settings_placeholder": "Settings content will live in this workspace next.", "settings_title": "Settings", "start": "Start from", "strategy_settings": "Strategies", "to": "to", "trade_messages_backtest": "Backtest", "trade_messages_capital": "Initial capital (USD)", "trade_messages_chart": "Trade actions and net asset curve", "trade_messages_detail": "Backtest result", "trade_messages_detail_placeholder": "Run a backtest to inspect performance metrics and chart output.", "trade_messages_equity_chart": "", "trade_messages_metrics": "Performance", "trade_messages_metrics_tab": "Metrics", "trade_messages_no_result": "No backtest has been run yet.", "trade_messages_price_chart": "", "trade_messages_strategy": "Strategy", "trade_messages_stream": "Backtest controls", "trade_messages_stream_placeholder": "Configure a ticker, strategy, and isolated capital amount, then run a single-ticker backtest.", "trade_messages_summary": "A full-screen workspace for strategy trading notifications and operator review.", "trade_messages_ticker": "Ticker", "trade_messages_title": "Trade messages", "trade_messages_transactions_tab": "Transaction details", "update_chart": "Compare", "updated_on": "Updated on:", "winner_alt": "Winner", "yfinance_reachable": "yfinance reachable", "yfinance_unreachable": "yfinance unavailable"}, "portfolio": {"items": [{"color": "#0055cc", "company_name": "Microsoft Corporation", "growth_multiple": 1.028942628368141, "logo_url": "/market-store/logos/MSFT.png", "ticker": "MSFT", "weight": 50}, {"color": "#ff2f92", "company_name": "Apple Inc.", "growth_multiple": 1.1814019033841998, "logo_url": "/market-store/logos/AAPL.png", "ticker": "AAPL", "weight": 50}], "totalReturn": 10.5172, "weights": [50, 50]}, "settingsSection": "about", "theme": {"accent_positive": "#2fff9c", "accent_primary": "#0055cc", "accent_secondary": "#ff2f92", "background": "#ffffff", "color_scheme": "light", "glass_highlight": "rgba(255, 255, 255, 0.55)", "muted": "#505a5f", "panel": "rgba(255, 255, 255, 0.68)", "panel_strong": "rgba(255, 255, 255, 0.82)", "radius_control": "10px", "radius_panel": "10px", "radius_shell": "10px", "shadow": "0 24px 80px rgba(17, 24, 39, 0.10)", "text": "#0b0c0c"}, "tradeBacktest": null}</script>
+<script>
+    window.ANTIGRAVITY_APP = JSON.parse(document.getElementById("antigravity_state").textContent);
+    window.ANTIGRAVITY_BOOTSTRAP = window.ANTIGRAVITY_BOOTSTRAP || {};
+</script>
+
+<script src="/static/assets/js/portfolio.js?v=v2.10.1"></script>
+
+<script src="/static/assets/js/app.js?v=v2.10.1"></script>
+
+<script src="/static/assets/js/chart.js?v=v2.10.1"></script>
+
+
+</body>
+</html>
