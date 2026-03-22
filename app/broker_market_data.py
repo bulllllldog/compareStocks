@@ -28,7 +28,7 @@ def test_broker_connection(settings: BrokerSettings) -> tuple[bool, str]:
             return False, "Longbridge credentials (App Key, App Secret, Access Token) are required."
         try:
             Config, QuoteContext, _, _ = _load_longbridge_openapi()
-            config = Config(
+            config = Config.from_apikey(
                 settings.longbridge_app_key.strip(),
                 settings.longbridge_app_secret.strip(),
                 settings.longbridge_access_token.strip(),
@@ -101,7 +101,7 @@ def fetch_longbridge_one_minute_history(ticker: str, settings: BrokerSettings) -
         raise ValueError("Save your Longbridge App Key, App Secret, and Access Token first.")
 
     Config, QuoteContext, Period, AdjustType = _load_longbridge_openapi()
-    config = Config(
+    config = Config.from_apikey(
         settings.longbridge_app_key.strip(),
         settings.longbridge_app_secret.strip(),
         settings.longbridge_access_token.strip(),

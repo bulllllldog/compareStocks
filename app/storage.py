@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from datetime import datetime, timezone
-import fcntl
 import json
 from pathlib import Path
 import shutil
@@ -17,6 +16,7 @@ from typing import Any
 from uuid import uuid4
 
 import pandas as pd
+import portalocker
 
 from .config import MARKET_STORE_DIR
 
@@ -154,11 +154,11 @@ def _parquet_table_lock(path: Path):
     with thread_lock:
         lock_path = _table_lock_path(path)
         with lock_path.open("a+b") as handle:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+            portalocker.lock(handle, portalocker.LOCK_EX)
             try:
                 yield
             finally:
-                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+                portalocker.unlock(handle)
 
 
 def _utc_iso_timestamp(path: Path | None = None) -> str:
